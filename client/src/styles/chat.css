@@ -1,0 +1,233 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+  width: 100%;
+  border-left: 1px solid var(--color-secondary-light);
+}
+.chat .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--color-secondary);
+
+  .text-name {
+    color: var(--font-color-gray);
+    font-size: 18px;
+  }
+
+  .profile-pic-group .image-gap {
+    background-color: var(--color-secondary) !important;
+  }
+
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--font-color-gray-dark);
+    }
+
+    &:hover svg {
+      fill: var(--font-color-gray);
+      transition: 0.1s;
+    }
+  }
+}
+.chat .messages {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1rem;
+  overflow-y: scroll;
+}
+.chat .message {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+
+  .profile-pic-container {
+    min-width: 30px;
+  }
+
+  .profile-pic {
+    min-width: 30px;
+    height: 30px;
+  }
+
+  .vertical-group {
+    gap: 4px;
+
+    .text-name {
+      margin-left: 4px;
+      color: var(--font-color-gray-dark);
+    }
+  }
+
+  .content {
+    padding: 0.6rem 0.8rem;
+    background-color: var(--color-secondary);
+    border-radius: 8px;
+    color: #ccc;
+  }
+
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.2rem;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .date {
+    color: var(--font-color-gray-dark);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.1s;
+  }
+
+  &:hover .date {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+.chat .message.align-end {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+
+  .content {
+    background-color: var(--color-custom-theme);
+  }
+}
+
+.chat .bottom-section {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem;
+  /* box-shadow: 0px -4px 16px 5px rgba(0, 0, 0, 0.1); */
+}
+.chat .bottom-section .container {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 24px;
+  background-color: var(--color-secondary);
+
+  input {
+    background-color: var(--color-secondary);
+    font-size: 14px;
+    padding: 0.5rem;
+    color: var(--font-color-gray);
+    width: 100%;
+  }
+}
+.chat .bottom-section .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--color-secondary);
+  border-radius: 50%;
+  min-width: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  cursor: pointer;
+  padding: 1rem;
+
+  &.active {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .icon {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  svg {
+    max-width: 24px;
+    width: 24px;
+    height: 24px;
+    fill: var(--font-color-gray-dark) !important;
+    stroke: var(--font-color-gray-dark) !important;
+  }
+
+  &.attachment svg {
+    transform: rotate(-45deg);
+  }
+
+  &.mic {
+    width: 50px;
+  }
+
+  &.mic.active {
+    width: 100%;
+    border-radius: 8px;
+    transition: 0.5s;
+
+    .content {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .pin {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: red;
+    }
+
+    .track {
+      background-color: var(--color-secondary-light);
+      height: 6px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    span {
+      color: var(--font-color-gray-dark);
+    }
+  }
+
+  &:hover {
+    background-color: var(--color-secondary-light);
+    transition: 0.1s;
+  }
+
+  &.mic.active:hover .track {
+    background-color: var(--color-secondary);
+    transition: 0.1s;
+  }
+
+  &.send:hover {
+    background-color: var(--color-custom-theme);
+
+    svg {
+      fill: var(--font-color-gray) !important;
+      stroke: var(--font-color-gray) !important;
+    }
+  }
+}
