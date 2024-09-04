@@ -21,6 +21,8 @@ export interface AuthRequest extends Request {
 app.use(
   cors({
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     origin: process.env.CLIENT_ORIGIN_URL,
   }),
 );
@@ -40,7 +42,10 @@ const server = app.listen(process.env.PORT || 5001, () => {
 
 export const io = new Server(server, {
   cors: {
-    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: process.env.CLIENT_ORIGIN_URL,
   },
 });
 

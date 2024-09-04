@@ -29,7 +29,7 @@ interface Message {
   content: string;
   type: string;
   parent?: Message;
-  reactions: Reaction[];
+  reactions?: Reaction[];
   created_At: string;
 }
 
@@ -70,7 +70,7 @@ const Chat = () => {
   const { auth } = useAuth();
 
   if (!auth) return null;
-  const socket: Socket = io("http://localhost:5000", { auth: { id: auth.id } });
+  const socket: Socket = io(import.meta.env.VITE_API_URL, { auth: { id: auth.id } });
 
   const joinChat = () => {
     socket.emit("join-chat", id);
@@ -177,7 +177,7 @@ const Chat = () => {
 
               <span className="date text-name no-select">{formatDate(message.created_At)}</span>
 
-              {message.reactions.map((reaction: Reaction, index: number) => (
+              {message.reactions?.map((reaction: Reaction, index: number) => (
                 <span className="text-name" key={index}>
                   {reaction.emoji}
                 </span>

@@ -1,9 +1,13 @@
 client/node_modules
 client/package-lock.json
+client/.env
 
 server/prisma/migrations
 server/node_modules
 server/package-lock.json
 server/.env
+
 server/public/uploads/voices/*
+!/server/public/uploads/voices/**/
 server/public/uploads/files/*
+!/server/public/uploads/files/**/
