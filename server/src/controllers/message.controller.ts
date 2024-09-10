@@ -33,6 +33,9 @@ export const create = async (req: Request, res: Response) => {
         parentId: replyId ? replyId : null,
         senderId: senderId,
       },
+      include: {
+        parent: true,
+      },
     });
 
     const chat = await db.chat.update({
@@ -90,10 +93,68 @@ export const deleteAll = async (req: Request, res: Response) => {
 
 export const reaction = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { content, userId } = req.body;
+    const { messageId } = req.params;
+    const { content } = req.body;
+    const { id } = (req as any).user;
 
-    if (!content || !userId) return res.status(400).json({ message: "Invalid data" });
+    if (!content || !id) return res.status(400).json({ message: "Invalid data" });
+
+    const message = await db.message.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+
+    const user = await db.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!message) return res.status(400).json({ message: "Invalid message id" });
+    if (!user) return res.status(400).json({ message: "Invalid user id" });
+
+    const alreadyReacted = await db.reaction.findFirst({
+      where: {
+        userId: id,
+        messageId: messageId,
+        emoji: content,
+      },
+    });
+
+    if (alreadyReacted) {
+      const reaction = await db.reaction.delete({
+        where: {
+          id: alreadyReacted.id,
+        },
+      });
+
+      io.emit("receive-remove-reaction", reaction);
+
+      return res.sendStatus(200);
+    }
+
+    const reaction = await db.reaction.create({
+      data: {
+        messageId: messageId,
+        emoji: content,
+        userId: id,
+      },
+    });
+
+    io.emit("receive-add-reaction", reaction);
+
+    return res.sendStatus(200);
+  } catch (e: any) {
+    console.log(e);
+  }
+};
+
+export const deleteById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) return res.status(400).json({ message: "Id is required" });
 
     const message = await db.message.findUnique({
       where: {
@@ -101,20 +162,17 @@ export const reaction = async (req: Request, res: Response) => {
       },
     });
 
-    const user = await db.user.findUnique({
+    if (!message) return res.status(400).json({ message: "Invalid id" });
+
+    await db.reaction.deleteMany({
       where: {
-        id: userId,
+        messageId: id,
       },
     });
 
-    if (!message) return res.status(400).json({ message: "Invalid message id" });
-    if (!user) return res.status(400).json({ message: "Invalid user id" });
-
-    await db.reaction.create({
-      data: {
-        messageId: id,
-        emoji: content,
-        userId: userId,
+    await db.message.delete({
+      where: {
+        id: id,
       },
     });
 

@@ -3,6 +3,8 @@
   max-width: 400px;
   background-color: var(--color-primary);
   height: 100%;
+  border-right: 1px solid var(--color-secondary);
+  z-index: 2;
 
   .header {
     display: flex;
@@ -52,9 +54,31 @@
     }
   }
 
-  .header .text-name {
+  .header .horizontal-group .text-name {
     font-size: 22px;
     padding-left: 8px;
+  }
+}
+
+.sidebar .menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 4px;
+  background-color: var(--color-secondary);
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.3);
+
+  .item-button {
+    border-radius: 4px;
+
+    .text-name {
+      font-size: 12px;
+    }
+
+    &:hover {
+      background-color: var(--color-secondary-light) !important;
+    }
   }
 }
 

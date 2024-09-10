@@ -1,6 +1,7 @@
 client/node_modules
 client/package-lock.json
 client/.env
+client/dist
 
 server/prisma/migrations
 server/node_modules

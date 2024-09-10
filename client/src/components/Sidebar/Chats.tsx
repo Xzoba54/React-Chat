@@ -8,12 +8,15 @@ import useAuth from "../../hooks/useAuth.ts";
 import Chat from "./Chat.tsx";
 import Search from "./Search.tsx";
 import Loading from "../Loading.tsx";
+import { useNavigate } from "react-router-dom";
 
 export interface Member {
   id: string;
+  created_at: string;
   profile: {
     name: string;
     imageUrl: string;
+    status?: string;
   };
 }
 
@@ -43,9 +46,10 @@ const Chats = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { auth } = useAuth();
+  const navigate = useNavigate();
 
   if (!auth) return null;
-  const socket: Socket = io("http://localhost:5000", { auth: { id: auth.id } });
+  const socket: Socket = io(import.meta.env.VITE_API_URL, { auth: { id: auth.id } });
 
   const fetchChats = async () => {
     try {
@@ -69,7 +73,7 @@ const Chats = () => {
     return () => {
       socket.off("new-message");
     };
-  }, []);
+  }, [navigate]);
 
   if (!chats) return null;
 

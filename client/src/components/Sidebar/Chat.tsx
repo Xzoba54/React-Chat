@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import { Chat as ChatProps, Message } from "./Chats";
 
 import ChatAvatar from "../ChatAvatar";
-import formatDate from "../../utils/formatDate";
+import { formatShortDate } from "../../utils/formatDate";
 import formatName from "../../utils/formatName";
 import useAuth from "../../hooks/useAuth";
 
@@ -29,7 +29,7 @@ const Chat = ({ chat }: { chat: ChatProps }) => {
         </div>
 
         <div className="details">
-          <span className="date text-name">{chat.lastMessage && formatDate(chat.lastMessage.created_At)}</span>
+          <span className="date text-name">{chat.lastMessage && formatShortDate(chat.lastMessage.created_At)}</span>
           <div className="pin">
             <span></span>
           </div>

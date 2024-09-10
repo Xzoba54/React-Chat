@@ -53,11 +53,11 @@ const Sidebar = () => {
             <TbDotsVertical />
             {isOpen && (
               <div className="menu">
-                <div className="item">
+                <div className="item-button">
                   <IoIosSettings />
                   <span className="text-name no-select">Settings</span>
                 </div>
-                <div className="item" onClick={logout}>
+                <div className="item-button" onClick={logout}>
                   <CiLogout />
                   <span className="text-name no-select">Logout</span>
                 </div>

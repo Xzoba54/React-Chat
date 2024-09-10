@@ -5,26 +5,25 @@ import { io, Socket } from "socket.io-client";
 import { axiosPrivate } from "../utils/axios";
 import useAuth from "../hooks/useAuth";
 
-import { Chat as ChatProps, Member } from "../components/Sidebar/Chats.tsx";
+import { Chat as ChatProps } from "../components/Sidebar/Chats.tsx";
 
-import ChatAvatar from "../components/ChatAvatar.tsx";
 import ChatControl from "../components/ChatControl.tsx";
 
-import { FaPlay } from "react-icons/fa";
-import { FaPause } from "react-icons/fa";
-import { IoIosCall } from "react-icons/io";
-import { IoVideocam } from "react-icons/io5";
-import { TbPinnedFilled } from "react-icons/tb";
+import Sidebar from "../components/Chat/Sidebar.tsx";
+import Header from "../components/Chat/Header.tsx";
+import TextMessage from "../components/Chat/Message.tsx";
+import Info from "../components/Chat/Info.tsx";
+import { formatFullDate, formatShortDate } from "../utils/formatDate.ts";
 
-import formatName from "../utils/formatName.ts";
-import formatDate from "../utils/formatDate.ts";
-
-interface Reaction {
+export interface Reaction {
+  id: string;
   userId: string;
+  messageId: string;
   emoji: string;
 }
 
-interface Message {
+export interface Message {
+  id: string;
   senderId: string;
   content: string;
   type: string;
@@ -33,40 +32,14 @@ interface Message {
   created_At: string;
 }
 
-const AudioPlayer = ({ url }: { url: string }) => {
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const play = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const pause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    setIsPlaying(false);
-  };
-
-  return (
-    <div className="audio-player">
-      <div className="pause-stop">{isPlaying ? <FaPause onClick={pause} /> : <FaPlay onClick={play} />}</div>
-      <span className="text-name time no-select">0:00</span>
-      <audio ref={audioRef} src={url}></audio>
-    </div>
-  );
-};
-
 const Chat = () => {
   const [chat, setChat] = useState<ChatProps>();
   const [messages, setMessages] = useState<Message[]>([]);
-  const { id } = useParams();
+  const [reply, setReply] = useState<Message>();
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  const { id } = useParams();
   const { auth } = useAuth();
 
   if (!auth) return null;
@@ -122,72 +95,50 @@ const Chat = () => {
       setMessages((prev) => [...prev, message]);
     });
 
+    socket.on("receive-add-reaction", (reaction: Reaction) => {
+      setMessages((prev) => prev.map((message: Message) => (message.id === reaction.messageId ? { ...message, reactions: message.reactions ? [...message.reactions, reaction] : [reaction] } : message)));
+    });
+
+    socket.on("receive-remove-reaction", (reaction: Reaction) => {
+      setMessages((prev) => prev.map((message: Message) => (message.id === reaction.messageId ? { ...message, reactions: message.reactions ? message.reactions.filter((_reaction: Reaction) => _reaction.id !== reaction.id) : [] } : message)));
+    });
+
     return () => {
       socket.off("receive-message");
+      socket.off("receive-add-reaction");
+      socket.off("receive-remove-reaction");
     };
   }, [id]);
 
   if (!chat || !messages || !id) return null;
 
-  const messageUserImage = (members: Member[], message: Message, msgIndex: number) => {
-    if (msgIndex < messages.length - 1 && message.senderId === messages[msgIndex + 1].senderId) return <div className="profile-pic-container"></div>;
-
-    return (
-      <div className="profile-pic-container">
-        {members.map((member: Member, index: number) => {
-          if (member.id === message.senderId) {
-            return <img src={member.profile.imageUrl || "/defaultProfilePicture.jpg"} title={member.profile.name} alt="profile image" className="profile-pic" key={index} />;
-          }
-        })}
-      </div>
-    );
-  };
-
   return (
     <div className="chat">
-      <div className="header">
-        <div className="horizontal-group">
-          <ChatAvatar members={chat.members} />
-          <span className="text-name name first-capitalize">{formatName(chat, auth.id)}</span>
-        </div>
+      <Header chat={chat} />
 
-        <div className="icons">
-          <div className="icon">
-            <IoIosCall />
-          </div>
-          <div className="icon">
-            <IoVideocam />
-          </div>
-          <div className="icon" style={{ transform: "rotate(45deg)" }}>
-            <TbPinnedFilled />
-          </div>
-        </div>
-      </div>
+      <div className="layout">
+        <div className="content">
+          <div ref={chatContainerRef} className="messages" style={{ height: "100%" }}>
+            <Info chat={chat} />
 
-      <div ref={chatContainerRef} className="messages" style={{ height: "100%" }}>
-        {messages.map((message: Message, index: number) => {
-          return (
-            <div className={`message ${message.senderId === auth.id ? "align-end" : ""}`} key={index}>
-              {messageUserImage(chat.members, message, index)}
-              <div className="vertical-group">
-                {auth.id !== message.senderId && index < messages.length - 1 && message.senderId === messages[index + 1].senderId && <span className="text-name">{chat.members.map((member) => member.id === message.senderId && member.profile.name)}</span>}
-                {message.parent && <span className="text-name">Reply to: {message.parent.content}</span>}
-                <div className="content">{message.type === "Text" ? <span>{message.content}</span> : <AudioPlayer url={message.content} />}</div>
-              </div>
-
-              <span className="date text-name no-select">{formatDate(message.created_At)}</span>
-
-              {message.reactions?.map((reaction: Reaction, index: number) => (
-                <span className="text-name" key={index}>
-                  {reaction.emoji}
-                </span>
-              ))}
+            <div className="separator">
+              <span className="text-name">{formatFullDate(chat.created_at)}</span>
             </div>
-          );
-        })}
-      </div>
 
-      <ChatControl chatId={id} />
+            {messages.map((message: Message, index: number) => {
+              const sender = chat.members.find((member) => member.id === message.senderId);
+              const firstMessage = index - 1 >= 0 && messages[index - 1].senderId !== message.senderId;
+              const lastMessage = (index + 1 < messages.length && message.senderId !== messages[index + 1].senderId) || messages.length === index + 1;
+
+              return <TextMessage handleSetReply={setReply} sender={sender} firstMessage={firstMessage} lastMessage={lastMessage} message={message} key={index} />;
+            })}
+          </div>
+
+          <ChatControl chatId={id} reply={reply} handleSetReply={setReply} />
+        </div>
+
+        <Sidebar chatId={id} member={chat.members.find((member) => member.id !== auth.id)} />
+      </div>
     </div>
   );
 };

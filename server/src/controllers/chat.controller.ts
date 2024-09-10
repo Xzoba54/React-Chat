@@ -40,10 +40,12 @@ export const getById = async (req: Request, res: Response) => {
         members: {
           select: {
             id: true,
+            created_at: true,
             profile: {
               select: {
                 name: true,
                 imageUrl: true,
+                status: true,
               },
             },
           },
@@ -75,6 +77,7 @@ export const getMessagesById = async (req: Request, res: Response) => {
         reactions: {
           select: {
             userId: true,
+            messageId: true,
             emoji: true,
           },
         },
@@ -82,6 +85,46 @@ export const getMessagesById = async (req: Request, res: Response) => {
     });
 
     return res.json(messages);
+  } catch (e: any) {
+    console.log(e);
+  }
+};
+
+export const deleteById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) return res.status(400).json({ message: "Id is required" });
+
+    const chat = await db.chat.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!chat) return res.status(400).json({ message: "Invalid id" });
+
+    await db.reaction.deleteMany({
+      where: {
+        message: {
+          chatId: id,
+        },
+      },
+    });
+
+    await db.message.deleteMany({
+      where: {
+        chatId: id,
+      },
+    });
+
+    await db.chat.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return res.sendStatus(200);
   } catch (e: any) {
     console.log(e);
   }

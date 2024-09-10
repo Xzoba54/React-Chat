@@ -10,7 +10,7 @@
 
 :root {
   --color-primary: hsl(214, 11%, 13%);
-  --color-primary-dark: HSL(214, 11%, 10%);
+  --color-primary-dark: HSL(214, 11%, 11%);
   --color-secondary: hsl(210, 9%, 18%);
   --color-secondary-light: hsl(213, 8%, 22%);
   --font-color-gray: hsl(0, 0%, 97%);
@@ -18,6 +18,7 @@
 
   --color-custom-theme: hsl(216, 63%, 45%);
   --color-green: hsl(120, 85%, 38%);
+  --color-red: hsl(0, 60%, 40%);
 
   --modal-background: hsla(0, 0%, 0%, 0.2);
 
@@ -25,7 +26,7 @@
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -79,6 +80,7 @@ a {
   }
 }
 .profile-pic {
+  user-select: none;
   border-radius: 50%;
   border: 1px solid var(--color-secondary);
   min-width: 50px;
@@ -145,34 +147,44 @@ a {
   font-size: 14px;
 }
 
-.menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  background-color: var(--color-primary-dark);
-  box-shadow: 0px 0px 6px -1px rgba(0, 0, 0, 1);
+.item-button {
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
 
-  .item {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    min-width: 160px;
-    padding: 0.6rem 0.8rem;
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--font-color-gray-dark);
+    stroke: var(--font-color-gray-dark);
+  }
 
-    span {
-      font-size: 14px !important;
-      color: var(--font-color-gray-dark);
-    }
+  .text-name {
+    font-size: 12px;
+    color: var(--font-color-gray-dark);
+  }
+
+  &:hover {
+    background-color: var(--color-secondary) !important;
+    transition: 0.1s;
 
     svg {
-      min-width: 24px;
-      min-height: 24px;
-      fill: var(--color-secondary-light);
+      stroke: var(--font-color-gray) !important;
+      fill: var(--font-color-gray) !important;
     }
 
-    &:hover {
-      background-color: var(--color-primary);
+    .text-name {
+      color: var(--font-color-gray);
     }
+  }
+
+  &.button-warning:hover {
+    background-color: var(--color-red) !important;
   }
 }
 
