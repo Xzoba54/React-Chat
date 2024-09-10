@@ -13,7 +13,7 @@ import Sidebar from "../components/Chat/Sidebar.tsx";
 import Header from "../components/Chat/Header.tsx";
 import TextMessage from "../components/Chat/Message.tsx";
 import Info from "../components/Chat/Info.tsx";
-import { formatFullDate, formatShortDate } from "../utils/formatDate.ts";
+import { formatFullDate } from "../utils/formatDate.ts";
 
 export interface Reaction {
   id: string;
