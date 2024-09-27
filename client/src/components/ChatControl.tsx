@@ -29,6 +29,7 @@ type Props = {
 const ChatControl = ({ chatId, reply, handleSetReply }: Props) => {
   const [message, setMessage] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [sending, setSending] = useState<boolean>(false);
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -36,12 +37,16 @@ const ChatControl = ({ chatId, reply, handleSetReply }: Props) => {
   const [seconds, setSeconds] = useState<number>(0);
   const timerRef = useRef<number>(0);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+
   const { auth } = useAuth();
 
   if (!auth) return null;
 
   const sendMessage = async () => {
-    if (!isRecording && !message.trim()) return;
+    if (sending) return;
+    if (!isRecording && !file && !message.trim()) return;
     if (isRecording) {
       await stopRecording();
     }
@@ -54,6 +59,9 @@ const ChatControl = ({ chatId, reply, handleSetReply }: Props) => {
 
         data.append("type", "Voice");
         data.append("file", audio, "audio.wav");
+      } else if (file) {
+        data.append("type", "Image");
+        data.append("file", file, file.name);
       } else {
         data.append("type", "Text");
         data.append("content", message);
@@ -73,10 +81,13 @@ const ChatControl = ({ chatId, reply, handleSetReply }: Props) => {
       });
 
       setMessage("");
+      setFile(null);
       handleSetReply(undefined);
       audioChunks.current = [];
     } catch (e: any) {
       console.log(e);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -122,32 +133,77 @@ const ChatControl = ({ chatId, reply, handleSetReply }: Props) => {
     audioChunks.current = [];
   };
 
+  const handleAttachFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
+  const displayImage = () => {
+    if (file) {
+      return URL.createObjectURL(file);
+    }
+  };
+
+  const handleCancelAction = () => {
+    handleSetReply(undefined);
+    setFile(null);
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+  };
+
   return (
     <div className="bottom-section">
-      {reply && (
-        <div className="reply">
-          <div className="content">
-            <BsArrowReturnRight />
-            <span className="text-name">{reply.content}</span>
+      {(reply || file) && (
+        <div className="action">
+          <div className="vertical-group">
+            {reply && (
+              <div className="content">
+                <BsArrowReturnRight />
+                <span className="text-name">{reply.content}</span>
+              </div>
+            )}
+
+            {file && (
+              <div className="content">
+                <div className="image-container">
+                  <div className="image-header ">
+                    <div className="icon" onClick={handleRemoveFile}>
+                      <RiCloseLine />
+                    </div>
+                  </div>
+                  <img className="image" src={displayImage()} alt="Image" />
+                  <span className="text-name text-clamp">{file.name}</span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="icon" onClick={() => handleSetReply(undefined)}>
+          <div className="icon" onClick={handleCancelAction}>
             <RiCloseLine />
           </div>
         </div>
       )}
       <div className="controls">
         {!isRecording && (
-          <div className="button attachment">
+          <div className="button attachment" onClick={handleAttachFile}>
             <div className="icon">
               <ImAttachment />
             </div>
+
+            <input type="file" ref={fileInputRef} onChange={handleFileOnChange} />
           </div>
         )}
 

@@ -1,6 +1,7 @@
 import "./styles/index.css";
 import "./styles/sidebar.css";
 import "./styles/chat.css";
+import "./styles/form.css";
 
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 

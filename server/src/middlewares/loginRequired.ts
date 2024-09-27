@@ -21,7 +21,6 @@ const loginRequired = (req: Request, res: Response, next: NextFunction) => {
     }
 
     const user = jwt.verify(token, jwt_secret_access_token) as Jwt;
-    console.log(user);
     if (!user) return res.status(400).json({ message: "Invalid token" });
 
     (req as any).user = user;

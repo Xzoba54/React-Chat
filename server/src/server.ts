@@ -49,12 +49,6 @@ export const io = new Server(server, {
   },
 });
 
-interface Message {
-  content: string;
-  type: string;
-  senderId: string;
-}
-
 export const usersOnline: Map<string, Socket> = new Map();
 
 io.on("connection", (socket: Socket) => {

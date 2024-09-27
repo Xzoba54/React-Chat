@@ -1,9 +1,40 @@
+import { useEffect, useRef, useState } from "react";
+import NewChat from "../Modals/NewChat";
+import { Chat } from "./Chats";
+
 type Props = {
   search: string;
   setSearch: (value: string) => void;
+  handleAddChat: (newChat: Chat) => void;
 };
 
-const Search = ({ search, setSearch }: Props) => {
+const Search = ({ search, setSearch, handleAddChat }: Props) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const buttonRef = useRef<HTMLDivElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        console.log("fail modalref");
+      }
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        console.log("fail buttonref");
+      }
+
+      if (modalRef.current && !modalRef.current.contains(e.target as Node) && buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        console.log("close");
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="search">
       <div className="input-container">
@@ -18,9 +49,11 @@ const Search = ({ search, setSearch }: Props) => {
         <input onChange={(e) => setSearch(e.target.value)} value={search} placeholder="Search..." type="text" className="input" />
       </div>
 
-      <div className="button-add cursor-pointer">
+      <div onClick={() => setIsOpen(true)} ref={buttonRef} className="button-add cursor-pointer">
         <span>+</span>
       </div>
+
+      {isOpen && <NewChat handleAddChat={handleAddChat} handleSetModalOpen={setIsOpen} ref={modalRef} />}
     </div>
   );
 };

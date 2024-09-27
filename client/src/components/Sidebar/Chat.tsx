@@ -13,7 +13,12 @@ const Chat = ({ chat }: { chat: ChatProps }) => {
 
   const formatLastMessage = (lastMessage: Message | undefined) => {
     let content = lastMessage ? lastMessage.content : "Started a new chat";
-    if (lastMessage && lastMessage.type === "Voice") content = "Sent a voice message";
+
+    const user = lastMessage ? chat.members.find((member) => member.id === lastMessage.senderId) : null;
+
+    if (lastMessage && lastMessage.type === "Voice") content = `${user ? user.profile.name : ""} sent a voice message`;
+    if (lastMessage && lastMessage.type === "Image") content = `${user ? user.profile.name : ""} sent an image`;
+    if (lastMessage && lastMessage.isDeleted) content = `${user ? user.profile.name : ""} deleted message`;
 
     return <span className="text-name last-message text-clamp">{content}</span>;
   };

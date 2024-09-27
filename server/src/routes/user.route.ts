@@ -9,8 +9,8 @@ router.delete("/all", Controller.deleteAll);
 router.delete("/:id", Controller.deleteById);
 
 router.get("/:id/chats", Controller.getChats);
-router.get("/all", loginRequired, Controller.getAll);
 router.get("/:id", Controller.getById);
+router.get("/", loginRequired, Controller.getAll);
 router.put("/:id/profile-image", loginRequired, upload.single("image"), Controller.updateProfileImage);
 
 export { router as UserRouter };

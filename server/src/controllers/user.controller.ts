@@ -44,10 +44,34 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const getAll = async (req: Request, res: Response) => {
+  const query = typeof req.query.name === "string" ? req.query.name : "";
+
   try {
     const users = await db.user.findMany({
-      include: {
-        profile: true,
+      select: {
+        id: true,
+        created_at: true,
+        profile: {
+          select: {
+            name: true,
+            imageUrl: true,
+            status: true,
+          },
+        },
+      },
+      where: {
+        profile: {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      },
+      take: 8,
+      orderBy: {
+        profile: {
+          name: "asc",
+        },
       },
     });
 
@@ -91,13 +115,7 @@ export const getChats = async (req: Request, res: Response) => {
         },
       },
       include: {
-        lastMessage: {
-          select: {
-            content: true,
-            type: true,
-            created_At: true,
-          },
-        },
+        lastMessage: true,
         members: {
           select: {
             id: true,
@@ -113,6 +131,11 @@ export const getChats = async (req: Request, res: Response) => {
               name: "asc",
             },
           },
+        },
+      },
+      orderBy: {
+        lastMessage: {
+          created_At: "asc",
         },
       },
     });

@@ -1,10 +1,13 @@
-import { FaBan } from "react-icons/fa";
+import { FaBan, FaImage } from "react-icons/fa";
 import { FaPaintBrush } from "react-icons/fa";
 import { FaTrashCan } from "react-icons/fa6";
 import { Member } from "../Sidebar/Chats";
 import { formatFullDate } from "../../utils/formatDate";
 import { axiosPrivate } from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { IoIosArrowForward } from "react-icons/io";
+import Attachments from "./Attachments";
 
 type Props = {
   member?: Member;
@@ -12,6 +15,8 @@ type Props = {
 };
 
 const Sidebar = ({ member, chatId }: Props) => {
+  const [showAttachments, setShowAttachments] = useState<boolean>(false);
+
   if (!member) return null;
 
   const navigate = useNavigate();
@@ -25,6 +30,10 @@ const Sidebar = ({ member, chatId }: Props) => {
       console.log(e);
     }
   };
+
+  useEffect(() => {
+    setShowAttachments(false);
+  }, [chatId]);
 
   return (
     <div className="chat-sidebar">
@@ -50,6 +59,14 @@ const Sidebar = ({ member, chatId }: Props) => {
         <div className="item-button">
           <FaPaintBrush />
           <span className="text-name no-select">Change Theme</span>
+
+          <IoIosArrowForward />
+        </div>
+        <div className="item-button" onClick={() => setShowAttachments(true)}>
+          <FaImage />
+          <span className="text-name no-select">Attachments</span>
+
+          <IoIosArrowForward />
         </div>
         <div className="item-button button-warning">
           <FaBan />
@@ -60,6 +77,8 @@ const Sidebar = ({ member, chatId }: Props) => {
           <span className="text-name no-select">Delete Chat</span>
         </div>
       </div>
+
+      <Attachments chatId={chatId} handleOpen={showAttachments} handleSetOpen={setShowAttachments} />
     </div>
   );
 };

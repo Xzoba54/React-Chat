@@ -41,6 +41,8 @@ model Message {
   id      String      @id @default(uuid())
   content String
   type    MessageType
+  isDeleted Boolean @default(false)
+  isPinned Boolean @default(false)
 
   replies  Message[] @relation("MessageReplies")
   parent   Message?  @relation("MessageReplies", fields: [parentId], references: [id])
@@ -72,5 +74,5 @@ enum Provider {
 enum MessageType {
   Text
   Voice
-  File
+  Image
 }

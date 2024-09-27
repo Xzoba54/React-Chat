@@ -11,9 +11,12 @@ export const create = async (req: Request, res: Response) => {
     if (!chatId || !senderId || !type) return res.status(400).json({ message: "Invalid data" });
     if (type === "Text" && !content) return res.status(400).json({ message: "Invalid data" });
 
+    console.log(type);
+
     let contentData = "";
-    if (type === "Text") contentData = content;
-    else contentData = `http://localhost:${process.env.PORT || 5001}/public/uploads/voices/${req.file!.filename}`;
+    if (type === "Voice") contentData = `http://localhost:${process.env.PORT || 5001}/public/uploads/voices/${req.file!.filename}`;
+    else if (type === "Image") contentData = `http://localhost:${process.env.PORT || 5001}/public/uploads/files/${req.file!.filename}`;
+    else contentData = content;
 
     if (replyId) {
       const messageParent = await db.message.findUnique({
@@ -22,7 +25,7 @@ export const create = async (req: Request, res: Response) => {
         },
       });
 
-      if (!messageParent) return res.status(400).json({ message: "Invalid data" });
+      if (!messageParent) return res.status(400).json({ message: "Invalid datas" });
     }
 
     const message = await db.message.create({
@@ -152,29 +155,39 @@ export const reaction = async (req: Request, res: Response) => {
 
 export const deleteById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { messageId } = req.params;
+    const { id } = (req as any).user;
 
-    if (!id) return res.status(400).json({ message: "Id is required" });
+    if (!messageId) return res.status(400).json({ message: "Id is required" });
 
     const message = await db.message.findUnique({
       where: {
-        id: id,
+        id: messageId,
+        isDeleted: false,
       },
     });
 
     if (!message) return res.status(400).json({ message: "Invalid id" });
 
+    if (message.senderId !== id) return res.status(403).json({ message: "No permissions" });
+
     await db.reaction.deleteMany({
       where: {
-        messageId: id,
+        messageId: messageId,
       },
     });
 
-    await db.message.delete({
+    await db.message.update({
       where: {
-        id: id,
+        id: messageId,
+      },
+      data: {
+        isDeleted: true,
+        content: "",
       },
     });
+
+    io.emit("delete-message", messageId);
 
     return res.sendStatus(200);
   } catch (e: any) {

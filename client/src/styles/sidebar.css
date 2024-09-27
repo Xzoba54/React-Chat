@@ -2,7 +2,7 @@
   min-width: 400px;
   max-width: 400px;
   background-color: var(--color-primary);
-  height: 100%;
+  height: 100vh;
   border-right: 1px solid var(--color-secondary);
   z-index: 2;
 
@@ -10,6 +10,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: var(--sidebar-padding);
     background-color: var(--color-primary);
 
     .icons .icon {
@@ -86,7 +87,12 @@
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
+  height: calc(100vh - 105px);
   gap: 4px;
+
+  .list {
+    overflow-y: auto;
+  }
 }
 
 .chats .listItem {
@@ -191,5 +197,195 @@
   &:hover {
     background-color: var(--color-secondary-light);
     transition: 0.1s;
+  }
+}
+.create-chat {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-secondary);
+  width: 400px;
+  padding: 1rem 1.5rem;
+  gap: 18px;
+  border-radius: 8px;
+
+  .create-chat-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .text-name {
+      font-size: 24px;
+    }
+
+    .counter {
+      font-size: 13px;
+      color: var(--font-color-gray-dark);
+    }
+  }
+
+  .create-chat-input-container {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: var(--color-primary);
+    border-radius: 8px;
+
+    svg {
+      width: 24px;
+      stroke: var(--color-secondary-light);
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 6px;
+      background-color: transparent;
+      color: var(--font-color-gray);
+      font-size: 13px;
+    }
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    max-height: 210px;
+    height: 210px;
+    overflow-y: auto;
+    gap: 2px;
+
+    .item {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      gap: 6px;
+      border-radius: 8px;
+
+      .profile-pic {
+        min-width: 32px;
+        height: 32px;
+      }
+
+      .text-name {
+        /*checkbox size*/
+        margin-right: 20px;
+        color: var(--font-color-gray);
+        user-select: none;
+      }
+
+      &:hover {
+        background-color: var(--color-primary);
+        transition: 0.1s;
+      }
+    }
+  }
+
+  .members {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+
+    .member {
+      display: flex;
+      align-items: center;
+      padding: 2px 4px;
+      gap: 4px;
+      background-color: var(--color-primary);
+      border-radius: 4px;
+      min-width: 80px;
+
+      &:hover {
+        background-color: var(--color-secondary-light);
+        transition: 0.1s;
+        cursor: pointer;
+      }
+
+      .text-name {
+        color: var(--font-color-gray-dark);
+        user-select: none;
+      }
+
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        svg {
+          fill: var(--font-color-gray-dark);
+        }
+      }
+    }
+  }
+
+  .list .item .checkbox-container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      height: 0;
+      width: 0;
+      cursor: pointer;
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      height: 20px;
+      width: 20px;
+      border-radius: 4px;
+      background-color: transparent;
+      border: 1px solid var(--color-secondary-light);
+
+      &::after {
+        content: "";
+        position: absolute;
+        display: none;
+      }
+    }
+
+    & input:checked ~ .checkmark::after {
+      display: block;
+    }
+
+    & input:checked ~ .checkmark {
+      background-color: var(--color-custom-theme);
+    }
+
+    & .checkmark:after {
+      left: 8px;
+      top: 4px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+
+    &:hover input ~ .checkmark {
+      background-color: var(--color-secondary);
+    }
+
+    &:hover input:checked ~ .checkmark {
+      background-color: var(--color-custom-theme);
+    }
+  }
+
+  .button-create {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--font-color-gray-dark);
+
+    &:hover {
+      background-color: var(--color-custom-theme);
+      color: var(--font-color-gray);
+      transition: 0.1s;
+      cursor: pointer;
+    }
   }
 }
