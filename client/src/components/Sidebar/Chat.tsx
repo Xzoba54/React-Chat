@@ -1,43 +1,64 @@
 import { NavLink } from "react-router-dom";
-import { Chat as ChatProps, Message } from "./Chats";
 
-import ChatAvatar from "../ChatAvatar";
+import { Chat as ChatProps, Message } from "../../utils/types";
 import { formatShortDate } from "../../utils/formatDate";
-import formatName from "../../utils/formatName";
+import formatChatName from "../../utils/formatChatName";
+
 import useAuth from "../../hooks/useAuth";
 
-const Chat = ({ chat }: { chat: ChatProps }) => {
+import Avatar from "../Avatar";
+
+type Props = {
+  chat: ChatProps;
+};
+
+const FormatLastMessage = ({ chat, message }: { chat: ChatProps; message: Message }) => {
+  const user = chat.members.find((member) => member.id === message.senderId);
+  if (!user) return message.content;
+
+  const prefix = `${user.profile.name}: `;
+  let action = message.content;
+
+  if (message.isDeleted) {
+    action = "Deleted message";
+  }
+  if (message.type === "Voice") {
+    action = "Sent a voice message";
+  }
+  if (message.type === "Image") {
+    action = "Sent an image";
+  }
+
+  return (
+    <>
+      <strong>{prefix}</strong>
+      <span>{action}</span>
+    </>
+  );
+};
+
+const Chat = ({ chat }: Props) => {
   const { auth } = useAuth();
 
   if (!auth) return null;
 
-  const formatLastMessage = (lastMessage: Message | undefined) => {
-    let content = lastMessage ? lastMessage.content : "Started a new chat";
-
-    const user = lastMessage ? chat.members.find((member) => member.id === lastMessage.senderId) : null;
-
-    if (lastMessage && lastMessage.type === "Voice") content = `${user ? user.profile.name : ""} sent a voice message`;
-    if (lastMessage && lastMessage.type === "Image") content = `${user ? user.profile.name : ""} sent an image`;
-    if (lastMessage && lastMessage.isDeleted) content = `${user ? user.profile.name : ""} deleted message`;
-
-    return <span className="text-name last-message text-clamp">{content}</span>;
-  };
-
   return (
     <NavLink className={({ isActive }) => (isActive ? "active" : "")} to={`/chat/${chat.id}`}>
-      <div className="listItem cursor-pointer">
-        <ChatAvatar members={chat.members} />
+      <div className="item">
+        <Avatar members={chat.members} />
 
-        <div className="vertical-group">
-          <span className="text-name name first-capitalize">{formatName(chat, auth.id)}</span>
-          {formatLastMessage(chat.lastMessage)}
+        <div className="col">
+          <span className="name text-clamp">{formatChatName(chat, auth.id)}</span>
+          {chat.lastMessage && (
+            <span className="last-message text-clamp">
+              <FormatLastMessage chat={chat} message={chat.lastMessage} />
+            </span>
+          )}
         </div>
 
         <div className="details">
-          <span className="date text-name">{chat.lastMessage && formatShortDate(chat.lastMessage.created_At)}</span>
-          <div className="pin">
-            <span></span>
-          </div>
+          {chat.lastMessage && <span className="date">{formatShortDate(chat.lastMessage.created_At)}</span>}
+          <div className="pin" />
         </div>
       </div>
     </NavLink>

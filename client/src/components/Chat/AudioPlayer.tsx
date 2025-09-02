@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { FaPause, FaPlay } from "react-icons/fa";
-import { Message } from "../../pages/Chat";
+import { Message } from "../../utils/types";
 
 type Props = {
   message: Message;

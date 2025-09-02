@@ -8,8 +8,9 @@ const router: Router = Router();
 router.delete("/all", Controller.deleteAll);
 router.delete("/:id", Controller.deleteById);
 
-router.get("/:id/chats", Controller.getChats);
-router.get("/:id", Controller.getById);
+router.get("/me", loginRequired, Controller.me);
+router.get("/:id/chats", loginRequired, Controller.getChats);
+router.get("/:id", loginRequired, Controller.getById);
 router.get("/", loginRequired, Controller.getAll);
 router.put("/:id/profile-image", loginRequired, upload.single("image"), Controller.updateProfileImage);
 

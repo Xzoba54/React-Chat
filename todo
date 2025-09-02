@@ -1,0 +1,5 @@
+dropdown z sidebara header ma ten sam div i elementy co po kliknięciu na wiadomość(akcje)
+w ustawieniach zmienić sposób przechowywania w localstorage(utils/useLocalStorage)
+
+prisma:
+Profile - about

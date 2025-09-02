@@ -1,5 +1,2 @@
 @echo off
-set root=..
-start cmd /k "cd %root% && code ."
-start cmd /k "cd %root% && cd server && npm run dev"
-start cmd /k "cd %root% && cd client && npm run dev"
+start wt new-tab -d "D:\Projects\msg v2\server" cmd /k "npm run dev" ; new-tab -d "D:\Projects\msg v2\client" cmd /k "npm run dev"; new-tab -d "D:\Projects\msg v2" cmd /k "code ."

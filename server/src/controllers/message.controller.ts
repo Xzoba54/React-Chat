@@ -3,6 +3,7 @@ import { db } from "../utils/db";
 import path from "path";
 import fs from "fs";
 import { io, usersOnline } from "../server";
+import { PORT } from "../utils/getEnv";
 
 export const create = async (req: Request, res: Response) => {
   try {
@@ -11,11 +12,17 @@ export const create = async (req: Request, res: Response) => {
     if (!chatId || !senderId || !type) return res.status(400).json({ message: "Invalid data" });
     if (type === "Text" && !content) return res.status(400).json({ message: "Invalid data" });
 
-    console.log(type);
+    const all = {
+      chatId,
+      senderId,
+      content,
+      type,
+      replyId,
+    };
 
     let contentData = "";
-    if (type === "Voice") contentData = `http://localhost:${process.env.PORT || 5001}/public/uploads/voices/${req.file!.filename}`;
-    else if (type === "Image") contentData = `http://localhost:${process.env.PORT || 5001}/public/uploads/files/${req.file!.filename}`;
+    if (type === "Voice") contentData = `http://localhost:${PORT}/public/uploads/voices/${req.file!.filename}`;
+    else if (type === "Image") contentData = `http://localhost:${PORT}/public/uploads/files/${req.file!.filename}`;
     else contentData = content;
 
     if (replyId) {
@@ -68,7 +75,7 @@ export const create = async (req: Request, res: Response) => {
 
     return res.json(message);
   } catch (e: any) {
-    console.log(e);
+    console.log("error: ", e);
   }
 };
 
@@ -184,6 +191,7 @@ export const deleteById = async (req: Request, res: Response) => {
       data: {
         isDeleted: true,
         content: "",
+        parentId: null,
       },
     });
 

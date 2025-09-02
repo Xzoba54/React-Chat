@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../utils/db";
+import { io, usersOnline } from "../server";
 
 export const create = async (req: Request, res: Response) => {
   try {
@@ -37,6 +38,12 @@ export const create = async (req: Request, res: Response) => {
       },
     });
 
+    for (const member of chat.members) {
+      const socketId = usersOnline.get(member.id);
+      if (socketId) {
+        io.to(member.id).emit("create-chat", chat);
+      }
+    }
     return res.json(chat);
   } catch (e: any) {
     console.log(e);
@@ -125,6 +132,13 @@ export const deleteById = async (req: Request, res: Response) => {
       where: {
         id: id,
       },
+      include: {
+        members: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
 
     if (!chat) return res.status(400).json({ message: "Invalid id" });
@@ -148,6 +162,13 @@ export const deleteById = async (req: Request, res: Response) => {
         id: id,
       },
     });
+
+    for (const member of chat.members) {
+      const socketId = usersOnline.get(member.id);
+      if (socketId) {
+        io.to(member.id).emit("delete-chat", id);
+      }
+    }
 
     return res.sendStatus(200);
   } catch (e: any) {
@@ -174,6 +195,9 @@ export const getChatImages = async (req: Request, res: Response) => {
         chatId: chatId,
         type: "Image",
         isDeleted: false,
+      },
+      orderBy: {
+        created_At: "desc",
       },
     });
 

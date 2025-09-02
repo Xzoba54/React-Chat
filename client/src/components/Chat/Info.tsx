@@ -1,6 +1,6 @@
 import useAuth from "../../hooks/useAuth";
 import { formatFullDate } from "../../utils/formatDate";
-import formatName from "../../utils/formatName";
+import formatName from "../../utils/formatChatName";
 import ChatAvatar from "../ChatAvatar";
 import { Chat } from "../Sidebar/Chats";
 

@@ -1,31 +1,29 @@
 import ReactDOM from "react-dom";
-import { Message } from "../../pages/Chat";
+import { Message } from "../../utils/types";
 
 type Props = {
-  handleOpen: boolean;
   handleSetOpen: (val: boolean) => void;
   message: Message;
 };
 
-const ImageViewer = ({ message, handleOpen, handleSetOpen }: Props) => {
+const ImageViewer = ({ message, handleSetOpen }: Props) => {
   const modalRoot = document.getElementById("modal-layer");
 
   const openImageInNewTab = () => {
     if (message.type === "Image") {
       window.open(message.content);
     }
+
+    handleSetOpen(false);
   };
 
   if (!modalRoot) return null;
 
   return ReactDOM.createPortal(
     <div className="modal-container" onClick={() => handleSetOpen(false)}>
-      <div className="image-viewer">
-        <div className="image-viewer-header"></div>
+      <div className="image-viewer" onClick={(e) => e.stopPropagation()}>
         <img src={message.content} alt="Image" />
-        <span className="text-name" onClick={openImageInNewTab}>
-          Open in new tab
-        </span>
+        <span onClick={openImageInNewTab}>Open in new tab</span>
       </div>
     </div>,
     modalRoot,

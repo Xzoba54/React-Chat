@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../utils/db";
-import { AuthRequest } from "../server";
+import { PORT } from "../utils/getEnv";
 
 export const deleteAll = async (req: Request, res: Response) => {
   try {
@@ -162,7 +162,7 @@ export const updateProfileImage = async (req: Request, res: Response) => {
       data: {
         profile: {
           update: {
-            imageUrl: `http://localhost:${process.env.PORT || 5001}/public/uploads/files/${req.file!.filename}`,
+            imageUrl: `http://localhost:${PORT}/public/uploads/files/${req.file!.filename}`,
           },
         },
       },
@@ -172,6 +172,31 @@ export const updateProfileImage = async (req: Request, res: Response) => {
     });
 
     return res.sendStatus(200);
+  } catch (e: any) {
+    console.log(e);
+  }
+};
+
+export const me = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { id } = (req as any).user;
+
+    const user = await db.user.findUnique({
+      where: { id: id },
+      select: {
+        id: true,
+        created_at: true,
+        profile: {
+          select: {
+            imageUrl: true,
+            name: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    return res.json(user);
   } catch (e: any) {
     console.log(e);
   }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-import { axiosPrivate } from "../../utils/axios.ts";
+import { api } from "../../utils/axios.ts";
 import useAuth from "../../hooks/useAuth.ts";
 
 import Chat from "./Chat.tsx";
@@ -65,7 +65,7 @@ const Chats = () => {
 
   const fetchChats = async () => {
     try {
-      const res = await axiosPrivate.get(`/user/${auth.id}/chats`);
+      const res = await api.get(`/user/${auth.id}/chats`);
       const data = res.data as Chat[];
 
       const chats = sortChats(data as Chat[]);

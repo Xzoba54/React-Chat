@@ -11,10 +11,17 @@ const formatFullDate = (value: string): string => {
   return new Intl.DateTimeFormat("us-US", options).format(date);
 };
 
-const sameDay = (date: Date): boolean => {
+export const sameDay = (date: Date): boolean => {
   const now = new Date();
 
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+};
+
+export const onTheSameDay = (date1: string, date2: string): boolean => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+
+  return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDay() === d2.getDay();
 };
 
 const getDayDiff = (date: Date): number => {
@@ -22,6 +29,10 @@ const getDayDiff = (date: Date): number => {
   const timeDiff = now.getTime() - date.getTime();
 
   return timeDiff / (1000 * 60 * 60 * 24);
+};
+
+export const getMinutes = (date: string): number => {
+  return new Date(date).getTime() / (1000 * 60);
 };
 
 const formatShortDate = (value: string, strict: boolean = false): string => {

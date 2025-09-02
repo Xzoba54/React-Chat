@@ -1,4 +1,4 @@
-import { axiosPrivate } from "../utils/axios";
+import { api, setAccessToken } from "../utils/axios";
 import { jwtDecode } from "jwt-decode";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -25,7 +25,7 @@ const Login = () => {
     try {
       if (!email || !password) return;
 
-      const { data } = await axiosPrivate.post("/auth/loginWithEmail", {
+      const { data } = await api.post("/auth/loginWithEmail", {
         email: email,
         password: password,
       });
@@ -33,7 +33,8 @@ const Login = () => {
       let { id, name, imageUrl } = jwtDecode(data.token) as Auth;
 
       if (imageUrl == "") imageUrl = "/defaultProfilePicture.jpg";
-      window.localStorage.setItem("token", data.token);
+      // window.localStorage.setItem("token", data.token);
+      setAccessToken(data.token);
 
       setAuth({
         id: id,
@@ -95,7 +96,17 @@ const Login = () => {
 
               <label htmlFor="input">
                 <div className={`input-container ${emailError ? "error" : ""}`}>
-                  <input id="input" ref={emailInputRef} onKeyDown={(e) => e.key === "Enter" && handleBtnNext()} onChange={(e) => setEmail(e.target.value)} value={email} type="email" inputMode="email" autoComplete="email" placeholder="Email" />
+                  <input
+                    id="input"
+                    ref={emailInputRef}
+                    onKeyDown={(e) => e.key === "Enter" && handleBtnNext()}
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    placeholder="Email"
+                  />
                 </div>
               </label>
 
@@ -132,7 +143,16 @@ const Login = () => {
               <label htmlFor="input">
                 <span className="text-name">Email: {email}</span>
                 <div className="input-container">
-                  <input id="input" ref={passwordInputRef} onKeyDown={(e) => e.key === "Enter" && handleBtnLogin()} onChange={(e) => setPassword(e.target.value)} type="password" inputMode="text" autoComplete="new-password" placeholder="Password" />
+                  <input
+                    id="input"
+                    ref={passwordInputRef}
+                    onKeyDown={(e) => e.key === "Enter" && handleBtnLogin()}
+                    onChange={(e) => setPassword(e.target.value)}
+                    type="password"
+                    inputMode="text"
+                    autoComplete="new-password"
+                    placeholder="Password"
+                  />
                 </div>
                 <span className="text-name error">{formError}</span>
               </label>

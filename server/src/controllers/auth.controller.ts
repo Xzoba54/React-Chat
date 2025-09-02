@@ -4,6 +4,8 @@ import { db } from "../utils/db";
 import jwt from "jsonwebtoken";
 import { Jwt } from "../middlewares/loginRequired";
 
+import { ACCESS_TOKEN, ACCESS_TOKEN_EXPIRES, REFRESH_TOKEN, REFRESH_TOKEN_EXPIRES } from "../utils/getEnv";
+
 const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const validEmail = (email: string): boolean => {
   return regex.test(email);
@@ -95,22 +97,16 @@ export const loginWithEmail = async (req: Request, res: Response) => {
 
     const payload: Jwt = {
       id: user.id,
-      name: user!.profile!.name,
-      imageUrl: user!.profile?.imageUrl || "",
+      name: user.profile!.name,
+      imageUrl: user.profile?.imageUrl || "",
     };
 
-    const jwt_secret_access_token = process.env.JWT_SECRET_ACCESS_TOKEN;
-    const jwt_secret_refresh_token = process.env.JWT_SECRET_REFRESH_TOKEN;
+    const access_token = jwt.sign(payload, ACCESS_TOKEN, { expiresIn: ACCESS_TOKEN_EXPIRES });
+    const refresh_token = jwt.sign(payload, REFRESH_TOKEN, { expiresIn: REFRESH_TOKEN_EXPIRES });
 
-    if (!jwt_secret_access_token || !jwt_secret_refresh_token) {
-      console.log("Failed to get JWT tokens from .env file");
-      return res.sendStatus(500);
-    }
+    const isProd = process.env.NODE_ENV == "production";
 
-    const access_token = jwt.sign(payload, jwt_secret_access_token, { expiresIn: "1m" });
-    const refresh_token = jwt.sign(payload, jwt_secret_refresh_token, { expiresIn: "30m" });
-
-    res.cookie("refresh_token", refresh_token, { httpOnly: true });
+    res.cookie("refresh_token", refresh_token, { httpOnly: true, secure: isProd, maxAge: REFRESH_TOKEN_EXPIRES * 1000 });
 
     return res.json({ token: access_token });
   } catch (e: any) {
@@ -124,15 +120,7 @@ export const refresh = async (req: Request, res: Response) => {
 
     if (!refresh_token) return res.status(400).json({ message: "Refresh token is required" });
 
-    const jwt_secret_refresh_token = process.env.JWT_SECRET_REFRESH_TOKEN;
-    const jwt_secret_access_token = process.env.JWT_SECRET_ACCESS_TOKEN;
-
-    if (!jwt_secret_refresh_token || !jwt_secret_access_token) {
-      console.log("Failed to get JWT tokens from .env file");
-      return res.sendStatus(500);
-    }
-
-    const data = jwt.verify(refresh_token, jwt_secret_refresh_token) as Jwt;
+    const data = jwt.verify(refresh_token, REFRESH_TOKEN) as Jwt;
     if (!data) return res.status(401).json({ message: "Invalid refresh token" });
 
     const payload: Jwt = {
@@ -141,11 +129,13 @@ export const refresh = async (req: Request, res: Response) => {
       imageUrl: data.imageUrl,
     };
 
-    const access_token = jwt.sign(payload, jwt_secret_access_token, { expiresIn: "1m" });
+    const access_token = jwt.sign(payload, ACCESS_TOKEN, {
+      expiresIn: ACCESS_TOKEN_EXPIRES,
+    });
 
     return res.json({ token: access_token });
   } catch (e: any) {
-    return res.status(400).json({ message: "Invalid refresh token" });
+    return res.status(401).json({ message: "Invalid refresh token" });
   }
 };
 

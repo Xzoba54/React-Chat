@@ -6,11 +6,11 @@ const formatName = (chat: Chat, authId: string) => {
   }
 
   const members = chat.members;
-  if (members.length == 2) {
-    return members.map((member) => member.id !== authId && member.profile.name);
-  }
 
-  return members.map((member) => member.profile.name).join(", ");
+  return members
+    .filter((member) => member.id !== authId)
+    .map((member) => member.profile.name)
+    .join(", ");
 };
 
 export default formatName;

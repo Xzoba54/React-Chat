@@ -1,6 +1,6 @@
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { createContext, ReactNode, useEffect, useState } from "react";
-import { axiosPrivate } from "../utils/axios";
+import { api, setAccessToken, setLogoutCallback } from "../utils/axios";
 
 export interface Auth extends JwtPayload {
   id: string;
@@ -33,11 +33,12 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const refresh = async () => {
     try {
-      const { data } = await axiosPrivate.post("/auth/refreshToken");
+      const { data } = await api.post("/auth/refreshToken");
       let { id, name, imageUrl } = jwtDecode(data.token) as Auth;
 
       if (imageUrl == "") imageUrl = "/defaultProfilePicture.jpg";
-      window.localStorage.setItem("token", data.token);
+      // window.localStorage.setItem("token", data.token);
+      setAccessToken(data.token);
 
       setAuth({
         id: id,
@@ -52,15 +53,17 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const logout = async () => {
     try {
-      await axiosPrivate.post("/auth/logout");
+      await api.post("/auth/logout");
 
-      window.localStorage.clear();
+      // localStorage.removeItem("token");
+      setAccessToken(null);
       setAuth(undefined);
     } catch (e: any) {}
   };
 
   useEffect(() => {
     refresh();
+    setLogoutCallback(logout);
   }, [setAuth]);
 
   return <AuthContext.Provider value={{ auth, setAuth, logout, isLoading: loading }}>{children}</AuthContext.Provider>;

@@ -22,7 +22,7 @@ const multer = (req: Request, res: Response, next: NextFunction) => {
 
 router.post("/", loginRequired, multer, Controller.create);
 router.post("/:messageId/reaction", loginRequired, Controller.reaction);
-router.delete("/", Controller.deleteAll);
+/*no login required*/ router.delete("/", Controller.deleteAll);
 router.delete("/:messageId", loginRequired, Controller.deleteById);
 
 export { router as MessageRouter };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Message } from "../../pages/Chat";
-import { axiosPrivate } from "../../utils/axios";
+import { api } from "../../utils/axios";
 import { IoIosArrowForward } from "react-icons/io";
 import ImageViewer from "../Modals/ImageViewer";
 
@@ -17,7 +17,7 @@ const Attachments = ({ chatId, handleOpen, handleSetOpen }: Props) => {
 
   const fetchImages = async () => {
     try {
-      const { data } = await axiosPrivate.get(`/chat/${chatId}/images`);
+      const { data } = await api.get(`/chat/${chatId}/images`);
 
       console.log(data);
       setImages(data as Message[]);

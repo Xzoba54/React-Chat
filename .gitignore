@@ -9,6 +9,6 @@ server/package-lock.json
 server/.env
 
 server/public/uploads/voices/*
-!/server/public/uploads/voices/**/
+server/public/uploads/voices/**/
 server/public/uploads/files/*
-!/server/public/uploads/files/**/
+server/public/uploads/files/**/

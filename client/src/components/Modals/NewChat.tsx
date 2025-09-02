@@ -1,13 +1,17 @@
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { Chat, Member } from "../Sidebar/Chats";
-import { axiosPrivate } from "../../utils/axios";
-import debounce from "lodash/debounce";
-import { RiCloseLine } from "react-icons/ri";
-import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-interface SelectMember extends Member {
+import debounce from "lodash/debounce";
+
+import useAuth from "../../hooks/useAuth";
+import { api } from "../../utils/axios";
+import { Chat, Member } from "../../utils/types";
+
+import { RiCloseLine } from "react-icons/ri";
+
+import Search from "../Sidebar/Search";
+interface SelectedMember extends Member {
   checked: boolean;
 }
 
@@ -16,8 +20,8 @@ type Props = {
   handleAddChat: (newChat: Chat) => void;
 };
 
-const NewChat = forwardRef<HTMLDivElement, Props>(({ handleSetModalOpen, handleAddChat }, ref) => {
-  const [users, setUsers] = useState<SelectMember[]>([]);
+const NewChat = ({ handleAddChat, handleSetModalOpen }: Props) => {
+  const [users, setUsers] = useState<SelectedMember[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [query, setQuery] = useState<string>("");
   const modalRoot = document.getElementById("modal-layer");
@@ -25,12 +29,18 @@ const NewChat = forwardRef<HTMLDivElement, Props>(({ handleSetModalOpen, handleA
   const { auth } = useAuth();
   const navigate = useNavigate();
 
+  if (!modalRoot || !auth) return null;
+
   const fetchUsers = async (searchQuery: string) => {
     try {
-      const res = (await axiosPrivate.get(`/user${searchQuery && "?name=" + searchQuery}`)) as any;
-      const data = res.data as SelectMember[];
+      const res = (await api.get("/user", {
+        params: {
+          name: searchQuery,
+        },
+      })) as any;
+      const data = res.data as SelectedMember[];
 
-      const checkedUsers = data.map((user: SelectMember) => ({
+      const checkedUsers = data.map((user: SelectedMember) => ({
         ...user,
         checked: false,
       }));
@@ -49,11 +59,11 @@ const NewChat = forwardRef<HTMLDivElement, Props>(({ handleSetModalOpen, handleA
     try {
       const IDs = members.map((member) => member.id);
 
-      const { data } = await axiosPrivate.post("/chat", {
+      const { data } = await api.post("/chat", {
         members: IDs,
       });
 
-      handleAddChat(data as Chat);
+      // handleAddChat(data as Chat);
       handleSetModalOpen(false);
 
       navigate(`/chat/${data.id}`);
@@ -62,11 +72,9 @@ const NewChat = forwardRef<HTMLDivElement, Props>(({ handleSetModalOpen, handleA
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value;
-    setQuery(newQuery);
-    debouncedFetchUsers(newQuery);
-  };
+  useEffect(() => {
+    debouncedFetchUsers(query);
+  }, [query]);
 
   useEffect(() => {
     fetchUsers(query);
@@ -77,51 +85,37 @@ const NewChat = forwardRef<HTMLDivElement, Props>(({ handleSetModalOpen, handleA
   const addMember = (newMember: Member) => {
     if (members.find((member) => member.id === newMember.id)) return;
     if (members.length >= MAX_MEMBERS) return;
-    console.log("add");
 
     setMembers((prev) => [...prev, newMember]);
     setUsers((prev) => prev.map((user) => (user.id === newMember.id ? { ...user, checked: true } : user)));
   };
 
   const removeMember = (member: Member) => {
-    console.log("remove");
     setMembers((prev) => prev.filter((user) => user.id !== member.id));
     setUsers((prev) => prev.map((user) => (user.id === member.id ? { ...user, checked: false } : user)));
   };
 
   const Counter = () => {
-    if (members.length >= MAX_MEMBERS) return <span className="text-name counter">You can't select more people</span>;
+    if (members.length >= MAX_MEMBERS) return <span className="counter">You can't select more people</span>;
 
     const count = MAX_MEMBERS - members.length;
-    return <span className="text-name counter">You can select {count} more people</span>;
+    return <span className="counter">You can select {count} more people</span>;
   };
 
-  if (!modalRoot || !auth) return null;
-
   return ReactDOM.createPortal(
-    <div className="modal-container">
-      <div onClick={(e) => e.stopPropagation()} ref={ref} className="create-chat">
-        <div className="create-chat-header">
-          <span className="text-name">Create Chat</span>
+    <div className="modal-container" onClick={() => handleSetModalOpen(false)}>
+      <div onClick={(e) => e.stopPropagation()} className="create-chat">
+        <div className="header">
+          <span className="title">Create Chat</span>
           <Counter />
         </div>
 
-        <label className="create-chat-input-container" htmlFor="search">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-            <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
-            <g id="SVGRepo_iconCarrier">
-              <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path>{" "}
-            </g>
-          </svg>
-
-          <input onChange={(e) => handleChange(e)} type="text" id="search" placeholder="Type to search..." />
-        </label>
+        <Search search={query} setSearch={setQuery} />
 
         <div className="members">
           {members.map((member: Member, index: number) => (
             <div onClick={() => removeMember(member)} className="member" key={index}>
-              <span className="text-name text-clamp">{member.profile.name}</span>
+              <span className="name text-clamp">{member.profile.name}</span>
               <div className="icon">
                 <RiCloseLine />
               </div>
@@ -132,26 +126,33 @@ const NewChat = forwardRef<HTMLDivElement, Props>(({ handleSetModalOpen, handleA
         <div className="list">
           {users
             .filter((user) => user.id !== auth.id)
-            .map((user: SelectMember, index: number) => (
+            .map((user: SelectedMember, index: number) => (
               <div onClick={(e) => !(e.target as HTMLDivElement).closest(".checkbox-container") && addMember(user)} className="item" key={index}>
-                <img src={user.profile.imageUrl ? user.profile.imageUrl : "/defaultProfilePicture.jpg"} className="profile-pic" alt="Profile image" />
-                <span className="text-name text-clamp">{user.profile.name}</span>
+                <div className="image-xl">
+                  <img src={user.profile.imageUrl ? user.profile.imageUrl : "/defaultProfilePicture.jpg"} className="profile-pic" alt="Profile image" />
+                </div>
+                <span className="name text-clamp">{user.profile.name}</span>
 
                 <label className="checkbox-container">
-                  <input checked={members.find((member) => member.id === user.id) ? true : false} onChange={() => (members.find((member) => member.id === user.id) ? removeMember(user) : addMember(user))} id="checkbox" type="checkbox" />
+                  <input
+                    checked={members.find((member) => member.id === user.id) ? true : false}
+                    onChange={() => (members.find((member) => member.id === user.id) ? removeMember(user) : addMember(user))}
+                    id="checkbox"
+                    type="checkbox"
+                  />
                   <span className="checkmark"></span>
                 </label>
               </div>
             ))}
         </div>
 
-        <button onClick={handleCreateChat} className="button-create">
+        <button onClick={handleCreateChat} className="button">
           Create
         </button>
       </div>
     </div>,
-    modalRoot,
+    modalRoot
   );
-});
+};
 
 export default NewChat;

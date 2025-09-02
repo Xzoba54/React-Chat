@@ -6,9 +6,9 @@ const router: Router = Router();
 
 router.post("/", loginRequired, Controller.create);
 
-router.get("/:chatId/messages", Controller.getMessagesById);
-router.get("/:chatId/images", Controller.getChatImages);
-router.get("/:id", Controller.getById);
-router.delete("/:id", Controller.deleteById);
+router.get("/:chatId/messages", loginRequired, Controller.getMessagesById);
+router.get("/:chatId/images", loginRequired, Controller.getChatImages);
+router.get("/:id", loginRequired, Controller.getById);
+router.delete("/:id", loginRequired, Controller.deleteById);
 
 export { router as ChatRouter };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { axiosPrivate } from "../utils/axios";
+import { api } from "../utils/axios";
 import useAuth from "../hooks/useAuth";
 
 import { ImAttachment } from "react-icons/im";
@@ -74,7 +74,7 @@ const ChatControl = ({ chatId, reply, handleSetReply }: Props) => {
         data.append("replyId", reply.id);
       }
 
-      await axiosPrivate.post("/message", data, {
+      await api.post("/message", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
